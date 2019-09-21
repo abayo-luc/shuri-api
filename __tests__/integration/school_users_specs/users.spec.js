@@ -20,7 +20,7 @@ describe('School Users Controller', () => {
           users: [
             {
               email: 'user@school.org',
-              firstName: 'user',
+              name: 'user',
               type: 'TEACHER'
             }
           ]
@@ -47,7 +47,7 @@ describe('School Users Controller', () => {
           users: [
             {
               email: 'user@school.org',
-              lastName: 'user'
+              name: 'user'
             }
           ]
         })
@@ -155,14 +155,13 @@ describe('School Users Controller', () => {
     test('should update school user', () => {
       return request
         .put(`/api/v1/school-users/${userId}`)
-        .send({ firstName: 'Dodos', lastName: 'Mukunzi' })
+        .send({ name: 'Dodos' })
         .set('Authorization', `Bearer ${token}`)
         .expect(200)
         .then(res => {
           const { message, data } = res.body;
           expect(message).toMatch(/User update successfully/);
-          expect(data.firstName).toMatch(/Dodos/);
-          expect(data.lastName).toMatch(/Mukunzi/);
+          expect(data.name).toMatch(/Dodos/);
           expect(Object.keys(data)).toEqual(
             expect.arrayContaining(['id', 'schoolId', 'email']),
             expect.not.arrayContaining(['password'])
@@ -173,7 +172,7 @@ describe('School Users Controller', () => {
     test('should not update user with invalid id', () => {
       return request
         .put(`/api/v1/school-users/${userId}-kjafl`)
-        .send({ firstName: 'Dodo' })
+        .send({ name: 'Dodo' })
         .set('Authorization', `Bearer ${token}`)
         .expect(400)
         .then(res => {
@@ -187,7 +186,7 @@ describe('School Users Controller', () => {
     test('should respond with 404 error', () => {
       return request
         .put(`/api/v1/school-users/36e46bea-3f99-44ee-a610-23e7a997c678`)
-        .send({ firstName: 'Dodo' })
+        .send({ name: 'Dodo' })
         .set('Authorization', `Bearer ${token}`)
         .expect(404)
         .then(res => {

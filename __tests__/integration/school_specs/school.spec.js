@@ -8,13 +8,11 @@ const newSchool = {
   email: 'principal@kepler.org',
   phoneNumber: '0789277275',
   password: 'password',
-  longitude: '-56788765',
-  province: 'Kigali',
   sector: 'Kimironko',
-  cell: 'Bibare',
-  latitude: '+678987',
   district: 'Gasabo',
-  country: 'Rwanda'
+  country: 'Rwanda',
+  latitude: '-1.9496959999999999',
+  longitude: '30.101504'
 };
 describe('School Controller', () => {
   beforeAll(async () => {
@@ -193,7 +191,19 @@ describe('School Controller', () => {
           expect(data.name).toMatch(/Kepler HQ/);
         });
     });
-
+    test('should update school', () => {
+      return request
+        .put(`/api/v1/schools/${schoolId}`)
+        .send({ latitude: '-1.9496959999999999', longitude: 'lkajdf' })
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(400)
+        .then(res => {
+          const { error } = res.body;
+          expect(error).toEqual({
+            longitude: 'Invalid longitude value'
+          });
+        });
+    });
     test('should not update school with invalid id', () => {
       return request
         .put(`/api/v1/schools/${schoolId}-kjafl`)

@@ -2,8 +2,7 @@ import '@babel/polyfill';
 import request from '../../helpers/request';
 
 const newDriver = {
-  firstName: 'Luc',
-  lastName: 'Aba',
+  name: 'Luc',
   username: 'driver_3',
   phoneNumber: '0789277765',
   password: 'password'
@@ -32,13 +31,7 @@ describe('Driver Controller', () => {
           const { message, data } = res.body;
           expect(message).toMatch(/Driver registered successfully/);
           expect(Object.keys(data)).toEqual(
-            expect.arrayContaining([
-              'id',
-              'busCompanyId',
-              'firstName',
-              'lastName',
-              'username'
-            ]),
+            expect.arrayContaining(['id', 'busCompanyId', 'name', 'username']),
             expect.not.arrayContaining(['password'])
           );
           expect(data.busCompanyId).toEqual(
@@ -115,13 +108,7 @@ describe('Driver Controller', () => {
           const { message, data } = res.body;
           expect(message).toMatch(/Success/);
           expect(Object.keys(data)).toEqual(
-            expect.arrayContaining([
-              'id',
-              'busCompanyId',
-              'firstName',
-              'lastName',
-              'username'
-            ]),
+            expect.arrayContaining(['id', 'busCompanyId', 'name', 'username']),
             expect.not.arrayContaining(['password'])
           );
         });
@@ -198,14 +185,13 @@ describe('Driver Controller', () => {
     test('should bus company update its own driver', () => {
       return request
         .put(`/api/v1/drivers/${driverId}`)
-        .send({ firstName: 'luc-a', lastName: 'abayo-b' })
+        .send({ name: 'luc-a' })
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(200)
         .then(res => {
           const { message, data } = res.body;
           expect(message).toMatch(/Success/);
-          expect(data.firstName).toMatch(/luc-a/);
-          expect(data.lastName).toMatch(/abayo-b/);
+          expect(data.name).toMatch(/luc-a/);
           expect(Object.keys(data)).toEqual(
             expect.not.arrayContaining(['password'])
           );
@@ -215,7 +201,7 @@ describe('Driver Controller', () => {
     test('should bus company update its own driver', () => {
       return request
         .put(`/api/v1/drivers/${driverId}-hadf`)
-        .send({ firstName: 'luc-a', lastName: 'abayo-b' })
+        .send({ name: 'luc-a' })
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(400)
         .then(res => {

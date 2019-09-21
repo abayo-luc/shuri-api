@@ -9,8 +9,7 @@ export default class DriverController {
       const { id: companyId } = req.user;
       const newDriver = { busCompanyId: companyId };
       ({
-        firstName: newDriver.firstName,
-        lastName: newDriver.lastName,
+        name: newDriver.name,
         phoneNumber: newDriver.phoneNumber,
         username: newDriver.username,
         password: newDriver.password
@@ -83,7 +82,7 @@ export default class DriverController {
     try {
       const { id } = req.params;
       const { id: busCompanyId } = req.user;
-      const { firstName, lastName } = req.body;
+      const { name } = req.body;
       const driver = await Driver.findOne({
         where: {
           id,
@@ -93,7 +92,7 @@ export default class DriverController {
       if (!driver) {
         return notFound(res);
       }
-      const data = await driver.update({ firstName, lastName });
+      const data = await driver.update({ name });
       data.password = undefined;
       return res.status(200).json({ message: 'Success', data });
     } catch (err) {

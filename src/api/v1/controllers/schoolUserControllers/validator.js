@@ -9,8 +9,7 @@ export default (req, res, next) => {
     return res.status(400).json({ message: `List of user can't be empty` });
   }
   const user = Joi.object().keys({
-    firstName: Joi.string(),
-    lastName: Joi.string(),
+    name: Joi.string().label('Name should be a string'),
     email: Joi.string()
       .email()
       .required()

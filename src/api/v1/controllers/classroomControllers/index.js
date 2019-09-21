@@ -146,9 +146,9 @@ export default class ClassroomController {
       const alreadyExit = teacher.classroomId === id;
       if (alreadyExit) {
         throw new Error(
-          `${teacher.firstName ||
-            teacher.lastName ||
-            'Teacher'} already assigned to class ${classroom.name}`
+          `${teacher.name || 'Teacher'} already assigned to class ${
+            classroom.name
+          }`
         );
       }
       await teacher.setClassroom(classroom, { returning: true });
@@ -156,9 +156,7 @@ export default class ClassroomController {
         res,
         undefined,
         200,
-        `${teacher.firstName ||
-          teacher.lastName ||
-          'Teacher'} successfully added to ${classroom.name}`
+        `${teacher.name || 'Teacher'} successfully added to ${classroom.name}`
       );
     } catch (error) {
       return badRequest(res, error);

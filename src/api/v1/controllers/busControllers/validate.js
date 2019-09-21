@@ -2,10 +2,10 @@ import Joi from '@hapi/joi';
 import joiError from '../../../../utils/joiError';
 
 export default (req, res, next) => {
-  const schema =  Joi.object().keys( {
+  const schema = Joi.object().keys({
     plateNumber: Joi.string()
-      .min(6)
-      .max(6)
+      .min(7)
+      .max(7)
       .required()
       .label('Invalid plat number'),
     model: Joi.string()

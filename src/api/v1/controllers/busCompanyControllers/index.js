@@ -2,21 +2,16 @@ import { isEmpty } from 'lodash';
 import db from '../../../../models';
 import { badRequest, notFound, okResponse } from '../../../../utils/response';
 import generatePwd from '../../../../utils/genPwd';
+import { textSearch, paginate } from '../../../../utils/queryHelpers';
 
 const { BusCompany, School, SchoolCompanyPartnership: Partners } = db;
 export default class CompanyController {
   static async create(req, res) {
     try {
       const newCompany = {
+        ...req.body,
         password: generatePwd() // password to be sent to the user and changed
       };
-      ({
-        name: newCompany.name,
-        email: newCompany.email,
-        country: newCompany.country,
-        district: newCompany.district,
-        phoneNumber: newCompany.phoneNumber
-      } = req.body);
       const company = await BusCompany.create(newCompany);
       company.password = undefined;
       return okResponse(res, company, 201);
@@ -28,12 +23,11 @@ export default class CompanyController {
   static async update(req, res) {
     try {
       const { id } = req.params;
-      const { name, email, password } = req.body;
       const company = await BusCompany.findOne({ where: { id } });
       if (isEmpty(company)) {
         return notFound(res);
       }
-      const updatedCompany = await company.update({ name, email, password });
+      const updatedCompany = await company.update(req.body);
       updatedCompany.password = undefined;
       return okResponse(
         res,
@@ -46,14 +40,18 @@ export default class CompanyController {
     }
   }
 
-  static async findAll(_req, res) {
+  static async findAll(req, res) {
     try {
-      const companies = await BusCompany.findAll({
+      const { page, limit, search } = req.query;
+      const { rows, count } = await BusCompany.findAndCountAll({
+        ...textSearch(search, 'company'),
+        order: [['updatedAt', 'DESC']],
+        ...paginate(page, limit),
         attributes: {
           exclude: ['password']
         }
       });
-      return okResponse(res, { companies });
+      return okResponse(res, { companies: rows, totalCompanies: count });
     } catch (error) {
       return badRequest(error);
     }

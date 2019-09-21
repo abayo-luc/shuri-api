@@ -10,8 +10,7 @@ export default class SchoolUserController {
       const users = req.body.users.map(user => {
         const newUser = { password: generatePwd(), schoolId };
         ({
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
+          name: newUser.name,
           email: newUser.email,
           phoneNumber: newUser.phoneNumber,
           type: newUser.type
@@ -80,11 +79,7 @@ export default class SchoolUserController {
       const { id } = req.params;
       const { schoolId } = req.user;
       const newUser = {};
-      ({
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        phoneNumber: newUser.phoneNumber
-      } = req.body);
+      ({ name: newUser.name, phoneNumber: newUser.phoneNumber } = req.body);
       const user = await User.findOne({
         where: {
           id,

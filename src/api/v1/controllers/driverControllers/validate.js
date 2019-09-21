@@ -2,7 +2,7 @@ import Joi from '@hapi/joi';
 import joiError from '../../../../utils/joiError';
 
 export default (req, res, next) => {
-  const schema =  Joi.object().keys( {
+  const schema = Joi.object().keys({
     username: Joi.string()
       .min(4)
       .max(12)
@@ -12,12 +12,9 @@ export default (req, res, next) => {
       .min(6)
       .required()
       .label('Password should have minimum of 6 characters'),
-    firstName: Joi.string()
+    name: Joi.string()
       .required()
       .label('First name is required'),
-    lastName: Joi.string()
-      .required()
-      .label('Last name is required'),
     phoneNumber: Joi.string()
       .required()
       .label('Phone number is required')

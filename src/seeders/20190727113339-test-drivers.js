@@ -5,8 +5,7 @@ module.exports = {
       [
         {
           id: '36e46bea-3f99-44ee-a610-23e7a997a678',
-          firstName: 'Driver',
-          lastName: 'One',
+          name: 'Driver One',
           username: 'driver_company_1',
           phoneNumber: '0789277765',
           password:
@@ -17,8 +16,7 @@ module.exports = {
         },
         {
           id: '36e46bea-3f99-88bb-a610-23e7a997a678',
-          firstName: 'Driver',
-          lastName: 'Two',
+          name: 'Driver Two',
           username: 'driver_company_2',
           phoneNumber: '0789277576',
           password:
