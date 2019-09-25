@@ -91,12 +91,6 @@ describe('Classroom Controller', () => {
         .set('Authorization', `Bearer ${schoolToken}`)
         .expect(400);
     });
-    test('should not find all school classrooms with invalid schoolId', () => {
-      return request
-        .get(`/api/v1/schools/${classroomId}/classrooms`)
-        .set('Authorization', `Bearer ${schoolToken}`)
-        .expect(404);
-    });
   });
 
   describe('Find One', () => {
@@ -154,7 +148,7 @@ describe('Classroom Controller', () => {
   describe('Assign & Remove Teacher', () => {
     test('should not found teacher', () => {
       return request
-        .post(`/api/v1/classrooms/${teacherId}/teacher/${classroomId}`)
+        .post(`/api/v1/classrooms/${teacherId}/teachers/${classroomId}`)
         .set('Authorization', `Bearer ${schoolToken}`)
         .expect(404)
         .then(res => {
@@ -164,7 +158,7 @@ describe('Classroom Controller', () => {
     });
     test('should assign teacher to classroom', () => {
       return request
-        .post(`/api/v1/classrooms/${classroomId}/teacher/${teacherId}`)
+        .post(`/api/v1/classrooms/${classroomId}/teachers/${teacherId}`)
         .expect(200)
         .set('Authorization', `Bearer ${schoolToken}`)
         .then(res => {
@@ -175,19 +169,19 @@ describe('Classroom Controller', () => {
 
     test('should not assign teacher twice', () => {
       return request
-        .post(`/api/v1/classrooms/${classroomId}/teacher/${teacherId}`)
+        .post(`/api/v1/classrooms/${classroomId}/teachers/${teacherId}`)
         .set('Authorization', `Bearer ${schoolToken}`)
         .expect(400)
         .then(res => {
           const {
             error: { message }
           } = res.body;
-          expect(message.includes('already assigned to class')).toBeTruthy();
+          expect(message.includes('already assigned')).toBeTruthy();
         });
     });
     test('should remove teacher from classroom', () => {
       return request
-        .put(`/api/v1/classrooms/${classroomId}/teacher`)
+        .put(`/api/v1/classrooms/${classroomId}/teachers/remove`)
         .set('Authorization', `Bearer ${schoolToken}`)
         .expect(200)
         .then(res => {
@@ -200,14 +194,14 @@ describe('Classroom Controller', () => {
 
     test('should not found teacher', () => {
       return request
-        .put(`/api/v1/classrooms/${teacherId}/teacher`)
+        .put(`/api/v1/classrooms/${teacherId}/teachers/remove`)
         .set('Authorization', `Bearer ${schoolToken}`)
         .expect(404);
     });
 
     test('should not found teacher', () => {
       return request
-        .put(`/api/v1/classrooms/${teacherId}-kid/teacher`)
+        .put(`/api/v1/classrooms/${teacherId}-kid/teachers/remove`)
         .set('Authorization', `Bearer ${schoolToken}`)
         .expect(400);
     });
@@ -216,7 +210,7 @@ describe('Classroom Controller', () => {
   describe('Delete', () => {
     test('should assign teacher to classroom', () => {
       return request
-        .post(`/api/v1/classrooms/${classroomId}/teacher/${teacherId}`)
+        .post(`/api/v1/classrooms/${classroomId}/teachers/${teacherId}`)
         .expect(200)
         .set('Authorization', `Bearer ${schoolToken}`)
         .then(res => {
@@ -235,11 +229,7 @@ describe('Classroom Controller', () => {
           expect(message).toMatch(/Success/);
           expect(Object.keys(data)).toEqual(
             expect.arrayContaining([
-              'id',
-              'name',
-              'schoolId',
-              'school',
-              'teacher'
+              "id", "name", "code", "avatar", "schoolId", "createdAt", "updatedAt", "teacher"
             ])
           );
           expect(Object.keys(data.teacher)).toEqual(

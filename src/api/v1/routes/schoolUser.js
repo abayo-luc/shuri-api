@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import authenticate from '../../../middleware/authenticate';
 import SchoolUserController from '../controllers/schoolUserControllers';
-import validate from '../controllers/schoolUserControllers/validator';
+import validate, {validateUpdate, validateFilter}from '../controllers/schoolUserControllers/validator';
 import authorize from '../../../middleware/authorize';
 import isPrincipal from '../controllers/schoolUserControllers/isPrincipal';
 import { schoolPrincipal } from '../../../utils/roles';
@@ -15,11 +15,12 @@ routers
     validate,
     SchoolUserController.create
   )
-  .get('/schools/:schoolId/school-users', SchoolUserController.findAll)
+  .get('/schools/:schoolId/school-users',validateFilter, SchoolUserController.findAll) // it is paginate, searchable, and filter works
   .get('/school-users/:id', SchoolUserController.find)
   .put(
     '/school-users/:id',
-    authorize(schoolPrincipal),
+    authorize(schoolPrincipal, 'owner'),
+    validateUpdate,
     SchoolUserController.update
   )
   .delete(

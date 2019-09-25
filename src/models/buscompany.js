@@ -23,14 +23,31 @@ module.exports = (sequelize, DataTypes) => {
         allowNull: false,
         unique: true
       },
-      country: {
+      phoneNumber: {
         type: DataTypes.STRING,
         allowNull: false,
-        
+        unique: true
+      },
+      country: {
+        type: DataTypes.STRING,
+        allowNull: false
       },
       district: {
         type: DataTypes.STRING,
         allowNull: false
+      },
+      sector: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      logo: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: ''
+      },
+      description: {
+        type: DataTypes.STRING,
+        allowNull: true
       },
       password: {
         type: DataTypes.STRING,

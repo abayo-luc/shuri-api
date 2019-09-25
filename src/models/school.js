@@ -8,13 +8,35 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4
       },
+      email: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+      },
       name: {
         type: DataTypes.STRING,
         unique: true
       },
-      district: DataTypes.STRING,
-      country: DataTypes.STRING,
-      phoneNumber: DataTypes.STRING
+      district: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      country: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      latitude: DataTypes.STRING,
+      longitude: DataTypes.STRING,
+      logo: DataTypes.STRING,
+      description: DataTypes.STRING,
+      sector: {
+        type: DataTypes.STRING,
+        allowNull: false
+      }
     },
     {
       tableName: 'Schools'

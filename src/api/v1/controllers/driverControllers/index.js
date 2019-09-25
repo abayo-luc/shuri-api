@@ -1,25 +1,24 @@
+import Sequelize from 'sequelize';
 import db from '../../../../models';
-import { badRequest, notFound } from '../../../../utils/response';
+import { badRequest, notFound, okResponse } from '../../../../utils/response';
+import generatePwd from '../../../../utils/genPwd';
+import { paginate, textSearch } from '../../../../utils/queryHelpers';
 
-const { Driver, BusCompany, Bus, BusDriver } = db;
+const { Driver, Bus } = db;
 
 export default class DriverController {
   static async create(req, res) {
     try {
       const { id: companyId } = req.user;
-      const newDriver = { busCompanyId: companyId };
-      ({
-        firstName: newDriver.firstName,
-        lastName: newDriver.lastName,
-        phoneNumber: newDriver.phoneNumber,
-        username: newDriver.username,
-        password: newDriver.password
-      } = req.body);
+      const newDriver = {
+        ...req.body,
+        busCompanyId: companyId,
+        password: generatePwd()
+      };
+
       const driver = await Driver.create(newDriver);
       driver.password = undefined;
-      return res
-        .status(201)
-        .json({ message: 'Driver registered successfully', data: driver });
+      return okResponse(res, driver, 201, 'Driver registered successfully');
     } catch (err) {
       return badRequest(res, err);
     }
@@ -28,24 +27,29 @@ export default class DriverController {
   static async findAll(req, res) {
     try {
       const { companyId } = req.params;
-      const data = await BusCompany.findOne({
+      const { page, limit, search } = req.query;
+      const { rows, count } = await Driver.findAndCountAll({
         where: {
-          id: companyId
+          busCompanyId: companyId,
+          ...textSearch(search, 'driver').where
         },
+        ...paginate(page, limit),
         attributes: {
           exclude: ['password']
         },
         include: [
           {
-            model: Driver,
-            as: 'drivers',
+            model: Bus,
+            as: 'bus',
             attributes: {
-              exclude: ['password']
-            }
+              exclude: ['busCompanyId', 'driverId']
+            },
+            where: Sequelize.and({ occupied: true }),
+            required: false
           }
         ]
       });
-      return res.status(200).json({ message: 'Success', data });
+      return okResponse(res, { drivers: rows, totalDrivers: count });
     } catch (err) {
       return badRequest(res, err);
     }
@@ -64,16 +68,19 @@ export default class DriverController {
         include: [
           {
             model: Bus,
+            as: 'bus',
             attributes: {
-              exclude: ['BusDriver']
-            }
+              exclude: ['busCompanyId', 'driverId']
+            },
+            where: Sequelize.and({ occupied: true }),
+            required: false
           }
         ]
       });
       if (!driver) {
         return notFound(res);
       }
-      return res.status(200).json({ message: 'Success', data: driver });
+      return okResponse(res, driver);
     } catch (err) {
       return badRequest(res, err);
     }
@@ -83,7 +90,7 @@ export default class DriverController {
     try {
       const { id } = req.params;
       const { id: busCompanyId } = req.user;
-      const { firstName, lastName } = req.body;
+      const { name } = req.body;
       const driver = await Driver.findOne({
         where: {
           id,
@@ -93,9 +100,9 @@ export default class DriverController {
       if (!driver) {
         return notFound(res);
       }
-      const data = await driver.update({ firstName, lastName });
+      const data = await driver.update({ name });
       data.password = undefined;
-      return res.status(200).json({ message: 'Success', data });
+      return okResponse(res, driver);
     } catch (err) {
       return badRequest(res, err);
     }
@@ -115,7 +122,7 @@ export default class DriverController {
         return notFound(res);
       }
       await driver.destroy();
-      return res.status(200).json({ message: 'Driver removed successfully' });
+      return okResponse(res, undefined, 200, 'Driver removed successfully');
     } catch (err) {
       return badRequest(res, err);
     }
@@ -124,40 +131,29 @@ export default class DriverController {
   static async assignBus(req, res) {
     try {
       const { id, busId } = req.params;
-      const { id: companyId } = req.user;
-      const driver = await Driver.findOne({
-        where: {
-          id,
-          busCompanyId: companyId
-        }
-      });
-      if (!driver) {
-        return notFound(res);
-      }
+      const { id: busCompanyId } = req.user;
       const bus = await Bus.findOne({
         where: {
           id: busId,
-          busCompanyId: companyId
+          busCompanyId
         }
       });
       if (!bus) {
-        return notFound(res);
+        return notFound(res, 'Bus not found');
       }
-
-      const alreadyAssigned = await driver.hasBus(bus);
-      if (alreadyAssigned) {
-        throw new Error('Driver already assigned to the bus!!!');
+      if (bus.driverId === id && bus.occupied) {
+        throw Error('Driver already assigned to bus');
       }
-      const response = await driver.addBus(bus, {
-        through: {
-          companyId
-        }
+      const driver = await Driver.findByPk(id);
+      if (!driver) {
+        return notFound(res, 'Driver not found');
+      }
+      await bus.update({
+        occupied: true,
+        driverId: driver.id,
+        assignedAt: new Date()
       });
-
-      return res.status(201).json({
-        message: 'Driver assigned to bus successfully',
-        data: response
-      });
+      return okResponse(res, undefined, 200, 'Driver assigned successfully');
     } catch (error) {
       return badRequest(res, error);
     }
@@ -166,21 +162,26 @@ export default class DriverController {
   static async removeBus(req, res) {
     try {
       const { id, busId } = req.params;
-      const { id: companyId } = req.user;
-      const record = await BusDriver.findOne({
+      const { id: busCompanyId } = req.user;
+      const record = await Bus.findOne({
         where: {
           driverId: id,
-          busId,
-          companyId
+          id: busId,
+          busCompanyId
         }
       });
       if (!record) {
         return notFound(res);
       }
-      await record.destroy();
-      return res
-        .status(200)
-        .json({ message: 'Driver removed from bus successfully' });
+      await record.update({
+        occupied: false
+      });
+      return okResponse(
+        res,
+        undefined,
+        200,
+        'Driver removed from bus successfully'
+      );
     } catch (error) {
       return badRequest(res, error);
     }

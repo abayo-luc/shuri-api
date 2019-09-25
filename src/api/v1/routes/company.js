@@ -23,13 +23,14 @@ companyRouters
   )
   .get('/companies/:id', CompanyController.find)
   .get('/companies/:id/partners', CompanyController.partners)
+  .get('/partners/:id', CompanyController.getPartner)
   .put(
-    '/partners/:schoolId/approve',
+    '/partners/:id/approve',
     authorize(busCompany),
     CompanyController.approvePartner
   )
   .put(
-    '/partners/:schoolId/reject',
+    '/partners/:id/reject',
     authorize(busCompany),
     CompanyController.rejectPartner
   )

@@ -15,11 +15,7 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4
       },
-      firstName: {
-        type: DataTypes.STRING,
-        allowNull: false
-      },
-      lastName: {
+      name: {
         type: DataTypes.STRING,
         allowNull: false
       },
@@ -27,12 +23,30 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         allowNull: false
       },
+      birthDay: {
+        type: DataTypes.DATE,
+        allowNull: false
+      },
       phoneNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+      },
+      sex: {
         type: DataTypes.STRING,
         allowNull: false
       },
-      username: {
+      country: {
         type: DataTypes.STRING,
+        allowNull: false
+      },
+      drivingLicence: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+      },
+      busCompanyId: {
+        type: DataTypes.UUID,
         allowNull: false
       }
     },
@@ -63,10 +77,14 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'busCompanyId',
       hooks: true
     });
-    Driver.belongsToMany(models.Bus, {
+    // Driver.belongsToMany(models.Bus, {
+    //   foreignKey: 'driverId',
+    //   through: models.BusDriver
+    //   // as: 'drivers'
+    // });
+    Driver.hasOne(models.Bus, {
       foreignKey: 'driverId',
-      through: models.BusDriver
-      // as: 'drivers'
+      as: 'bus'
     });
   };
 

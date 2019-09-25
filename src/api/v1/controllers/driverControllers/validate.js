@@ -1,27 +1,41 @@
+/* eslint-disable no-useless-escape */
 import Joi from '@hapi/joi';
 import joiError from '../../../../utils/joiError';
 
-export default (req, res, next) => {
-  const schema =  Joi.object().keys( {
-    username: Joi.string()
-      .min(4)
-      .max(12)
-      .required()
-      .label('Username should be between 4-12 characters'),
-    password: Joi.string()
-      .min(6)
-      .required()
-      .label('Password should have minimum of 6 characters'),
-    firstName: Joi.string()
+const allSchema = {
+  POST: Joi.object().keys({
+    name: Joi.string()
       .required()
       .label('First name is required'),
-    lastName: Joi.string()
+    country: Joi.string()
       .required()
-      .label('Last name is required'),
+      .label('Country is required'),
+    sex: Joi.string()
+      .required()
+      .label('Field is required'),
+    drivingLicence: Joi.string()
+      .required()
+      .label('Driving licence is required'),
+    birthDay: Joi.date()
+      .required()
+      .label('Invalid birth date'),
     phoneNumber: Joi.string()
-      .required()
-      .label('Phone number is required')
-  });
+      .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im)
+      .label('Invalid phone number')
+  }),
+  PUT: Joi.object().keys({
+    name: Joi.string().label('First name is required'),
+    country: Joi.string().label('Country is required'),
+    sex: Joi.string().label('Field is required'),
+    drivingLicence: Joi.string().label('Driving licence is required'),
+    birthDay: Joi.date().label('Invalid birth date'),
+    phoneNumber: Joi.string()
+      .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im)
+      .label('Invalid phone number')
+  })
+};
+export default (req, res, next) => {
+  const schema = allSchema[req.method];
   return Joi.validate({ ...req.body }, schema, (err, _value) => {
     if (err) {
       const error = joiError(err);

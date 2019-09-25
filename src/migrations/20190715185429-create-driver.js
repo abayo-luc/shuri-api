@@ -7,11 +7,7 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4
       },
-      firstName: {
-        type: Sequelize.STRING,
-        allowNull: false
-      },
-      lastName: {
+      name: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -21,12 +17,24 @@ module.exports = {
       },
       phoneNumber: {
         type: Sequelize.STRING,
-        allowNull: false
-      },
-      username: {
-        type: Sequelize.STRING,
         allowNull: false,
         unique: true
+      },
+      sex: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      birthDay: {
+        allowNull: false,
+        type: Sequelize.DATE
+      },
+      country: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      drivingLicence: {
+        type: Sequelize.STRING,
+        allowNull: false
       },
       createdAt: {
         allowNull: false,

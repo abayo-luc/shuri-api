@@ -1,34 +1,59 @@
+/* eslint-disable no-useless-escape */
 import Joi from '@hapi/joi';
 import joiError from '../../../../utils/joiError';
 
 const allSchema = {
-  PUT:  Joi.object().keys( {
-    name: Joi.string().label('Name should be a string'),
+  PUT: Joi.object().keys({
+    name: Joi.string().label('Name is required'),
     email: Joi.string()
       .email()
       .label('Invalid email'),
+    country: Joi.string().label('Country is required'),
+    district: Joi.string().label('District is required'),
+    sector: Joi.string().label('Sector is required'),
+    phoneNumber: Joi.string()
+      .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im)
+      .label('Invalid phone number'),
     password: Joi.string()
-      .min(6)
-      .label('Password should be more than 6 characters')
+      .min(4)
+      .label('Password too short'),
+    logo: Joi.string()
+      .uri()
+      .label('Logo should be a valid url'),
+    description: Joi.string()
+      .max(250)
+      .label('Description should not be more than 250 character')
   }),
-  POST:  Joi.object().keys( {
+  POST: Joi.object().keys({
     name: Joi.string()
       .required()
       .label('Name is required'),
-    email: Joi.string().email().required().label('Invalid email'),
+    email: Joi.string()
+      .email()
+      .required()
+      .label('Invalid email'),
     country: Joi.string()
       .required()
       .label('Country is required'),
     district: Joi.string()
       .required()
       .label('District is required'),
-    phoneNumber: Joi.string()
+    sector: Joi.string()
       .required()
-      .min(10)
-      .max(12)
+      .label('Sector is required'),
+    phoneNumber: Joi.string()
+      .regex(/^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/im)
+      .required()
       .label('Invalid phone number'),
-    password: Joi.string().min(4).label('Password too short'),
-    description: Joi.string().min(100).max(250).label('Description should be between 100 and 250 characters')
+    password: Joi.string()
+      .min(4)
+      .label('Password too short'),
+    logo: Joi.string()
+      .uri()
+      .label('Logo should be a valid url'),
+    description: Joi.string()
+      .max(250)
+      .label('Description should not be more than 250 character')
   })
 };
 export default (req, res, next) => {
