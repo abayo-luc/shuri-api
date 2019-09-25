@@ -3,6 +3,7 @@ import request from '../../helpers/request';
 
 let companyToken;
 let schoolToken;
+let partnershipId;
 describe('Partnership Functionalities', () => {
   beforeAll(async () => {
     const response = await request.post('/api/v1/companies/auth').send({
@@ -24,10 +25,11 @@ describe('Partnership Functionalities', () => {
         .expect(200)
         .then(res => {
           const { message, data } = res.body;
+          partnershipId = data.partners[0].id;
           expect(message).toMatch(/Success/);
           expect(data).toEqual(expect.arrayContaining([]));
-          expect(Object.keys(data[0])).toEqual(
-            expect.arrayContaining(['id', 'schoolId', 'companyId', 'School'])
+          expect(Object.keys(data.partners[0])).toEqual(
+            expect.arrayContaining(['id', 'schoolId', 'companyId', 'school'])
           );
         });
     });
@@ -66,12 +68,25 @@ describe('Partnership Functionalities', () => {
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(400);
     });
-
+    test('should company approve partnership request', () => {
+      return request
+        .put(`/api/v1/partners/${partnershipId}/approve`)
+        .set('Authorization', `Bearer ${companyToken}`)
+        .expect(200)
+        .then(res => {
+          const { data } = res.body;
+          expect(data.status).toMatch(/approved/);
+        });
+    });
     test('should company reject partnership request', () => {
       return request
-        .put(`/api/v1/partners/36e46bea-3f99-44ee-a610-23e7a997c678/reject`)
+        .put(`/api/v1/partners/${partnershipId}/reject`)
         .set('Authorization', `Bearer ${companyToken}`)
-        .expect(200);
+        .expect(200)
+        .then(res => {
+          const { data } = res.body;
+          expect(data.status).toMatch(/rejected/);
+        });
     });
 
     test('should return not found on reject non existing request', () => {

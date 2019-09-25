@@ -7,10 +7,7 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4
       },
-      firstName: {
-        type: Sequelize.STRING
-      },
-      lastName: {
+      name: {
         type: Sequelize.STRING
       },
       email: {
@@ -20,7 +17,8 @@ module.exports = {
       },
       phoneNumber: {
         type: Sequelize.STRING,
-        unique: true
+        unique: true,
+        allowNull: true
       },
       password: {
         type: Sequelize.STRING,
@@ -34,6 +32,14 @@ module.exports = {
          */
         type: Sequelize.ENUM('TM', 'DOD', 'PRINCIPAL', 'TEACHER'),
         defaultValue: 'TM'
+      },
+      sex:{
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      birthDay:{
+        allowNull: true,
+        type: Sequelize.DATE
       },
       createdAt: {
         allowNull: false,

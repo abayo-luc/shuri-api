@@ -9,12 +9,27 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4
       },
-      model: DataTypes.STRING,
+      model: {
+        type: DataTypes.STRING,
+        allowNull: false
+      },
+      seatsNumber: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+      },
+      carteJaune: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true
+      },
       plateNumber: {
         type: DataTypes.STRING,
         allowNull: false,
         unique: true
-      }
+      },
+      assignedAt: DataTypes.DATE,
+      occupied: DataTypes.BOOLEAN,
+      driverId: DataTypes.UUID
     },
     {
       tableName: 'Buses'
@@ -33,10 +48,14 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: 'busCompanyId',
       hooks: true
     });
-    Bus.belongsToMany(models.Driver, {
-      foreignKey: 'busId',
-      through: models.BusDriver
-      // as: 'buses'
+    // Bus.belongsToMany(models.Driver, {
+    //   foreignKey: 'busId',
+    //   through: models.BusDriver
+    //   // as: 'buses'
+    // });
+    Bus.belongsTo(models.Driver, {
+      foreignKey: 'driverId',
+      as: 'driver'
     });
   };
 

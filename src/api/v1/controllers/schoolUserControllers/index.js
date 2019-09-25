@@ -1,23 +1,14 @@
 import model from '../../../../models';
-import { badRequest, notFound } from '../../../../utils/response';
+import { badRequest, notFound, okResponse } from '../../../../utils/response';
 import generatePwd from '../../../../utils/genPwd';
+import {paginate, textSearch} from '../../../../utils/queryHelpers'
 
-const { User, School } = model;
+const { User, Classroom } = model;
 export default class SchoolUserController {
   static async create(req, res) {
     try {
       const { schoolId } = req.user;
-      const users = req.body.users.map(user => {
-        const newUser = { password: generatePwd(), schoolId };
-        ({
-          firstName: newUser.firstName,
-          lastName: newUser.lastName,
-          email: newUser.email,
-          phoneNumber: newUser.phoneNumber,
-          type: newUser.type
-        } = user);
-        return newUser;
-      });
+      const users = req.body.users.map(user => ({ ...user, password: generatePwd(), schoolId }));
 
       const response = await User.bulkCreate(users, {
         returning: true,
@@ -35,21 +26,30 @@ export default class SchoolUserController {
   static async findAll(req, res) {
     try {
       const { schoolId } = req.params;
-      const data = await School.findOne({
+      const {limit, page, search, filter} = req.query
+      const filterBy = {}
+      if(filter && ['TM', 'DOD', 'PRINCIPAL', 'TEACHER'].includes(filter)){
+        filterBy.type = filter
+      }
+      const {rows, count}= await User.findAndCountAll({
         where: {
-          id: schoolId
+          schoolId,
+          ...filterBy,
+          ...textSearch(search, 'user').where
+        },
+        ...paginate(page, limit),
+        attributes: {
+          exclude: ['password', 'schoolId', 'classroomId']
         },
         include: [
           {
-            model: User,
-            as: 'users',
-            attributes: {
-              exclude: ['password']
-            }
+            model: Classroom,
+            as: 'classroom',
+            
           }
         ]
       });
-      return res.json({ message: 'Success', data });
+      return okResponse(res, {users: rows, totalUsers: count})
     } catch (err) {
       return badRequest(res, err);
     }
@@ -63,8 +63,15 @@ export default class SchoolUserController {
           id
         },
         attributes: {
-          exclude: ['password']
-        }
+          exclude: ['password', 'schoolId', 'classroomId']
+        },
+        include: [
+          {
+            model: Classroom,
+            as: 'classroom',
+            
+          }
+        ]
       });
       if (!user) {
         return notFound(res);
@@ -80,11 +87,7 @@ export default class SchoolUserController {
       const { id } = req.params;
       const { schoolId } = req.user;
       const newUser = {};
-      ({
-        firstName: newUser.firstName,
-        lastName: newUser.lastName,
-        phoneNumber: newUser.phoneNumber
-      } = req.body);
+      ({ name: newUser.name, phoneNumber: newUser.phoneNumber } = req.body);
       const user = await User.findOne({
         where: {
           id,

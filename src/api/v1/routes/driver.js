@@ -8,16 +8,11 @@ import { busCompany } from '../../../utils/roles';
 const driverRouters = Router();
 driverRouters.all('*', authenticate);
 driverRouters
-  .post(
-    '/drivers',
-    authorize(busCompany),
-    validate,
-    DriverController.create
-  )
+  .post('/drivers', authorize(busCompany), validate, DriverController.create)
   .get('/companies/:companyId/drivers', DriverController.findAll)
   .get('/drivers/:id', DriverController.find)
   .put('/drivers/:id', DriverController.update)
-  .post(
+  .put(
     '/drivers/:id/buses/:busId',
     authorize(busCompany),
     DriverController.assignBus

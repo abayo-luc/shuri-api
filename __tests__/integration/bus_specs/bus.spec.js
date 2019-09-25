@@ -1,6 +1,12 @@
 import '@babel/polyfill';
 import request from '../../helpers/request';
 
+const newBus = {
+  model: 'Yutongo',
+  plateNumber: 'RAC234V',
+  seatsNumber: 4,
+  carteJaune: '6787-787-798'
+};
 let companyToken;
 let busId;
 describe('Bus Controller', () => {
@@ -18,9 +24,7 @@ describe('Bus Controller', () => {
     test('should add a new bus successfully', done => {
       return request
         .post('/api/v1/buses')
-        .send({
-          plateNumber: 'H2O788'
-        })
+        .send(newBus)
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(201)
         .then(res => {
@@ -31,6 +35,8 @@ describe('Bus Controller', () => {
               'id',
               'model',
               'plateNumber',
+              'carteJaune',
+              'seatsNumber',
               'busCompanyId',
               'updatedAt',
               'createdAt'
@@ -44,9 +50,7 @@ describe('Bus Controller', () => {
     test('should not add an already existing car', done => {
       return request
         .post('/api/v1/buses')
-        .send({
-          plateNumber: 'H2O788'
-        })
+        .send(newBus)
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(400)
         .then(res => {
@@ -81,9 +85,7 @@ describe('Bus Controller', () => {
   describe('Get Buss', () => {
     test('Should return one bus', done => {
       return request
-        .get(
-          `/api/v1/buses/${busId}`
-        )
+        .get(`/api/v1/buses/${busId}`)
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(200)
         .then(res => {
@@ -94,6 +96,8 @@ describe('Bus Controller', () => {
               'id',
               'model',
               'plateNumber',
+              'seatsNumber',
+              'carteJaune',
               'busCompanyId',
               'updatedAt',
               'createdAt'
@@ -105,9 +109,7 @@ describe('Bus Controller', () => {
 
     test('should return error on invalid bus id', () => {
       return request
-        .get(
-          `/api/v1/buses/${busId}-jka`
-        )
+        .get(`/api/v1/buses/${busId}-jka`)
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(400)
         .then(res => {
@@ -120,9 +122,7 @@ describe('Bus Controller', () => {
 
     test('should return not found error', () => {
       return request
-        .get(
-          `/api/v1/buses/36e46bea-3f99-44ee-a610-23e7a997a680`
-        )
+        .get(`/api/v1/buses/36e46bea-3f99-44ee-a610-23e7a997a680`)
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(404)
         .then(res => {
@@ -140,7 +140,9 @@ describe('Bus Controller', () => {
         .then(res => {
           const { message, data } = res.body;
           expect(message).toMatch(/Success/);
-          expect(Object.keys(data)).toEqual(expect.arrayContaining(['buses']));
+          expect(Object.keys(data)).toEqual(
+            expect.arrayContaining(['buses', 'totalBuses'])
+          );
           expect(data.buses.length >= 1).toBeTruthy();
           expect(Object.keys(data.buses[0])).toEqual(
             expect.arrayContaining(['id', 'plateNumber', 'busCompanyId'])
@@ -152,9 +154,7 @@ describe('Bus Controller', () => {
   describe('Edit Buses', () => {
     it('should update bus successfully', () => {
       return request
-        .put(
-          `/api/v1/buses/${busId}`
-        )
+        .put(`/api/v1/buses/${busId}`)
         .send({
           model: 'Yutongo'
         })
@@ -171,9 +171,7 @@ describe('Bus Controller', () => {
 
     it('should not update bus with an already existing platNumber', () => {
       return request
-        .put(
-          `/api/v1/buses/${busId}`
-        )
+        .put(`/api/v1/buses/${busId}`)
         .send({
           plateNumber: '676BCD'
         })
@@ -192,9 +190,7 @@ describe('Bus Controller', () => {
   describe('Delete Bus', () => {
     it('should only delete company buses', () => {
       return request
-        .delete(
-          `/api/v1/buses/36e46bea-3f99-88bb-a610-23e7a107a678`
-        )
+        .delete(`/api/v1/buses/36e46bea-3f99-88bb-a610-23e7a107a678`)
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(404)
         .then(res => {
@@ -205,9 +201,7 @@ describe('Bus Controller', () => {
 
     it('should should delete company bus', () => {
       return request
-        .delete(
-          `/api/v1/buses/${busId}`
-        )
+        .delete(`/api/v1/buses/${busId}`)
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(200)
         .then(res => {
@@ -216,12 +210,9 @@ describe('Bus Controller', () => {
         });
     });
 
-
     it('should not deleted with invalid bus id', () => {
       return request
-        .delete(
-          `/api/v1/buses/${busId}-jka`
-        )
+        .delete(`/api/v1/buses/${busId}-jka`)
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(400)
         .then(res => {

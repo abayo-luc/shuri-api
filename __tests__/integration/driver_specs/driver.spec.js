@@ -2,11 +2,12 @@ import '@babel/polyfill';
 import request from '../../helpers/request';
 
 const newDriver = {
-  firstName: 'Luc',
-  lastName: 'Aba',
-  username: 'driver_3',
-  phoneNumber: '0789277765',
-  password: 'password'
+  name: 'Plane',
+  phoneNumber: '0722139797',
+  sex: 'Male',
+  birthDay: '2000-09-09',
+  country: 'Rwanda',
+  drivingLicence: '678-6789-78'
 };
 let companyToken;
 let driverId;
@@ -34,10 +35,15 @@ describe('Driver Controller', () => {
           expect(Object.keys(data)).toEqual(
             expect.arrayContaining([
               'id',
+              'name',
+              'phoneNumber',
+              'sex',
+              'birthDay',
+              'country',
+              'drivingLicence',
               'busCompanyId',
-              'firstName',
-              'lastName',
-              'username'
+              'updatedAt',
+              'createdAt'
             ]),
             expect.not.arrayContaining(['password'])
           );
@@ -48,24 +54,7 @@ describe('Driver Controller', () => {
         });
     });
 
-    test('should validate new driver inputs', () => {
-      return request
-        .post('/api/v1/drivers')
-        .send({ ...newDriver, username: 'lu' })
-        .set('Authorization', `Bearer ${companyToken}`)
-        .expect(400)
-        .then(res => {
-          const { message, error } = res.body;
-          expect(message).toMatch(/Validation error/);
-          expect(error).toEqual(
-            expect.objectContaining({
-              username: 'Username should be between 4-12 characters'
-            })
-          );
-        });
-    });
-
-    test('should not register driver username twice', () => {
+    test('should not register driver phone number twice', () => {
       return request
         .post('/api/v1/drivers')
         .send({ ...newDriver })
@@ -74,7 +63,9 @@ describe('Driver Controller', () => {
         .then(res => {
           const { error } = res.body;
           expect(error).toEqual(
-            expect.objectContaining({ username: 'username is already taken' })
+            expect.objectContaining({
+              phoneNumber: 'phoneNumber is already taken'
+            })
           );
         });
     });
@@ -90,11 +81,6 @@ describe('Driver Controller', () => {
         .then(res => {
           const { message, data } = res.body;
           expect(message).toMatch(/Success/);
-          expect(Object.keys(data)).toEqual(
-            expect.arrayContaining(['id', 'name', 'email', 'drivers']),
-            expect.not.arrayContaining(['password'])
-          );
-          expect(data.id).toEqual('36e46bea-3f99-44ee-a610-23e7a997a641');
           expect(data.drivers.length >= 1).toBeTruthy();
           expect(data.drivers[0].busCompanyId).toEqual(
             '36e46bea-3f99-44ee-a610-23e7a997a641'
@@ -117,10 +103,16 @@ describe('Driver Controller', () => {
           expect(Object.keys(data)).toEqual(
             expect.arrayContaining([
               'id',
+              'name',
+              'birthDay',
+              'phoneNumber',
+              'sex',
+              'country',
+              'drivingLicence',
               'busCompanyId',
-              'firstName',
-              'lastName',
-              'username'
+              'createdAt',
+              'updatedAt',
+              'bus'
             ]),
             expect.not.arrayContaining(['password'])
           );
@@ -137,10 +129,8 @@ describe('Driver Controller', () => {
           const { message, data } = res.body;
           expect(message).toMatch(/Success/);
           expect(Object.keys(data)).toEqual(
-            expect.arrayContaining(['id', 'name', 'email', 'drivers']),
-            expect.not.arrayContaining(['password'])
+            expect.arrayContaining(['drivers', 'totalDrivers'])
           );
-          expect(data.id).toEqual('36e46bea-3f99-44ee-a610-23e7a997a641');
           expect(data.drivers.length >= 1).toBeTruthy();
           expect(data.drivers[0].busCompanyId).toEqual(
             '36e46bea-3f99-44ee-a610-23e7a997a641'
@@ -198,14 +188,13 @@ describe('Driver Controller', () => {
     test('should bus company update its own driver', () => {
       return request
         .put(`/api/v1/drivers/${driverId}`)
-        .send({ firstName: 'luc-a', lastName: 'abayo-b' })
+        .send({ name: 'luc-a' })
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(200)
         .then(res => {
           const { message, data } = res.body;
           expect(message).toMatch(/Success/);
-          expect(data.firstName).toMatch(/luc-a/);
-          expect(data.lastName).toMatch(/abayo-b/);
+          expect(data.name).toMatch(/luc-a/);
           expect(Object.keys(data)).toEqual(
             expect.not.arrayContaining(['password'])
           );
@@ -215,7 +204,7 @@ describe('Driver Controller', () => {
     test('should bus company update its own driver', () => {
       return request
         .put(`/api/v1/drivers/${driverId}-hadf`)
-        .send({ firstName: 'luc-a', lastName: 'abayo-b' })
+        .send({ name: 'luc-a' })
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(400)
         .then(res => {
@@ -265,22 +254,22 @@ describe('Driver Controller', () => {
   });
 
   describe('Assign Bus', () => {
-    test('should bus company assign bus to a driver', () => {
+    test('should assign bus to a driver', () => {
       return request
-        .post(
+        .put(
           '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a678/buses/36e46bea-3f99-44ee-a610-23e7a997c678'
         )
         .set('Authorization', `Bearer ${companyToken}`)
-        .expect(201)
+        .expect(200)
         .then(res => {
           const { message } = res.body;
-          expect(message).toMatch(/Driver assigned to bus successfully/);
+          expect(message).toMatch(/Driver assigned successfully/);
         });
     });
 
-    test('should bus company assign bus to a driver', () => {
+    test('should not assign bus to a driver', () => {
       return request
-        .post(
+        .put(
           '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a678/buses/36e46bea-3f99-44ee-a610-23e7a997c678'
         )
         .set('Authorization', `Bearer ${companyToken}`)
@@ -289,23 +278,23 @@ describe('Driver Controller', () => {
           const {
             error: { message }
           } = res.body;
-          expect(message).toMatch(/Driver already assigned to the bus!!!/);
+          expect(message).toMatch(/Driver already assigned to bus/);
         });
     });
 
-    test('should bus company assign bus to a driver', () => {
+    test('should return bus not found', () => {
       return request
         .post(
-          '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a677/buses/36e46bea-3f99-44ee-a610-23e7a997c678'
+          '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a678/buses/36e46bea-3f99-44ee-a610-23e7a997c687'
         )
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(404);
     });
 
-    test('should bus company assign bus to a driver', () => {
+    test('should return driver not found', () => {
       return request
         .post(
-          '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a678/buses/36e46bea-3f99-44ee-a610-23e7a997c697'
+          '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a687/buses/36e46bea-3f99-44ee-a610-23e7a997c678'
         )
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(404);
@@ -313,7 +302,7 @@ describe('Driver Controller', () => {
   });
 
   describe('Remove driver from the bus', () => {
-    test('should bus company assign bus to a driver', () => {
+    test('should successfully remove driver from bus', () => {
       return request
         .delete(
           '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a678/buses/36e46bea-3f99-44ee-a610-23e7a997c678'
@@ -326,10 +315,10 @@ describe('Driver Controller', () => {
         });
     });
 
-    test('should bus company assign bus to a driver', () => {
+    test('should return not found for non existing driver or bus id', () => {
       return request
         .delete(
-          '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a678/buses/36e46bea-3f99-44ee-a610-23e7a997c678'
+          '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a697/buses/36e46bea-3f99-44ee-a610-23e7a997c678'
         )
         .set('Authorization', `Bearer ${companyToken}`)
         .expect(404)
@@ -339,7 +328,7 @@ describe('Driver Controller', () => {
         });
     });
 
-    test('should bus company assign bus to a driver', () => {
+    test('should rise error on invalid driver or bus id', () => {
       return request
         .delete(
           '/api/v1/drivers/36e46bea-3f99-44ee-a610-23e7a997a6akdjf/buses/36e46bea-3f99-44ee-a610-23e7a997c678'

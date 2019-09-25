@@ -6,7 +6,7 @@ export default (req, res, next) => {
     name: Joi.string()
       .required()
       .label('Name is required'),
-    avatar: Joi.string(),
+    avatar: Joi.string().uri().label('Avatar must be a valid url'),
     code: Joi.string()
       .required()
       .label('Classroom code is required')

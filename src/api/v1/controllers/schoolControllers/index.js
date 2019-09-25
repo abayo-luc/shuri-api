@@ -2,6 +2,7 @@ import { isEmpty } from 'lodash';
 import db from '../../../../models';
 import { notFound, badRequest, okResponse } from '../../../../utils/response';
 import generatePassword from '../../../../utils/genPwd';
+import { textSearch, paginate } from '../../../../utils/queryHelpers';
 
 const { School, User, BusCompany: Company } = db;
 /* 
@@ -28,11 +29,15 @@ export default class SchoolController {
         district: newSchool.district,
         phoneNumber: newSchool.phoneNumber,
         longitude: newSchool.longitude,
-        latitude: newSchool.latitude
+        latitude: newSchool.latitude,
+        sector: newSchool.sector,
+        email: newSchool.email,
+        logo: newSchool.logo,
+        description: newSchool.description
       } = req.body);
       const user = await User.findOne({
         where: {
-          email: req.body.principal.email
+          email: req.body.email
         }
       });
       if (user) {
@@ -43,7 +48,7 @@ export default class SchoolController {
           ...newSchool,
           users: [
             {
-              ...req.body.principal,
+              email: req.body.email,
               password: generatePassword(), // password to be send to the user and user change them.
               phoneNumber: newSchool.phoneNumber,
               type: 'PRINCIPAL'
@@ -66,9 +71,13 @@ export default class SchoolController {
     }
   }
 
-  static async findAll(_req, res) {
+  static async findAll(req, res) {
     try {
-      const data = await School.findAll({
+      const { page, limit, search } = req.query;
+      const { rows, count } = await School.findAndCountAll({
+        ...textSearch(search, 'school'),
+        ...paginate(page, limit),
+        order: [['updatedAt', 'DESC']],
         include: [
           {
             model: User,
@@ -82,7 +91,7 @@ export default class SchoolController {
           }
         ]
       });
-      return okResponse(res, data, 200, 'Success');
+      return okResponse(res, { schools: rows, totalSchools: count });
     } catch (error) {
       return badRequest(res, error);
     }
@@ -91,13 +100,7 @@ export default class SchoolController {
   static async update(req, res) {
     try {
       const { id } = req.params;
-      const attributes = {};
-      ({
-        name: attributes.name,
-        country: attributes.province,
-        district: attributes.district,
-        phoneNumber: attributes.phoneNumber
-      } = req.body);
+      const attributes = { ...req.body };
       const school = await School.findOne({ where: { id } });
       if (isEmpty(school)) {
         return notFound(res);

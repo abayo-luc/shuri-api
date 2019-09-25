@@ -8,7 +8,11 @@ export default class AdminController {
   static async create(req, res) {
     try {
       const newUser = {};
-      ({ email: newUser.email, password: newUser.password } = req.body);
+      ({
+        email: newUser.email,
+        password: newUser.password,
+        name: newUser.name
+      } = req.body);
       const user = await Admin.create(newUser);
       user.password = undefined;
       return res.json({ message: 'Success', data: user });
@@ -31,7 +35,7 @@ export default class AdminController {
           ...filters
         },
         attributes: {
-          // exclude: ['password']
+          exclude: ['password']
         }
       });
       return res.json({ message: 'Success', data: allAdmins });

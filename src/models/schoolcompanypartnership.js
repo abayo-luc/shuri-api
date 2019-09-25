@@ -27,10 +27,12 @@ module.exports = (sequelize, DataTypes) => {
   );
   SchoolCompanyPartnership.associate = models => {
     SchoolCompanyPartnership.belongsTo(models.School, {
-      foreignKey: 'schoolId'
+      foreignKey: 'schoolId',
+      as: 'school'
     });
     SchoolCompanyPartnership.belongsTo(models.BusCompany, {
-      foreignKey: 'companyId'
+      foreignKey: 'companyId',
+      as: 'company'
     });
   };
 

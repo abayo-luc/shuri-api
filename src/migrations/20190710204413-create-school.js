@@ -7,12 +7,17 @@ module.exports = {
         type: Sequelize.UUID,
         defaultValue: Sequelize.UUIDV4
       },
+      email: {
+        type: Sequelize.STRING,
+        unique: true,
+        allowNull: false
+      },
       name: {
         type: Sequelize.STRING,
         unique: true,
         allowNull: false
       },
-      phoneNumber:{
+      phoneNumber: {
         type: Sequelize.STRING,
         allowNull: false
       },
@@ -24,16 +29,24 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-      latitude:{
+      latitude: {
         type: Sequelize.STRING,
         defaultValue: ''
       },
-      longitude:{
+      longitude: {
         type: Sequelize.STRING,
         defaultValue: ''
       },
-      description:{
-       type: Sequelize.STRING(250),
+      sector: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      logo: {
+        type: Sequelize.STRING,
+        defaultValue: ''
+      },
+      description: {
+        type: Sequelize.STRING(250)
       },
       createdAt: {
         allowNull: false,

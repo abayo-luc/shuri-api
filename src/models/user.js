@@ -10,8 +10,15 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.UUID,
         defaultValue: DataTypes.UUIDV4
       },
-      firstName: DataTypes.STRING,
-      lastName: DataTypes.STRING,
+      name: DataTypes.STRING,
+      birthDay:{
+        type: DataTypes.DATE,
+        allowNull: true
+      },
+      sex:{
+        type: DataTypes.STRING,
+        allowNull: true
+      },
       email: {
         type: DataTypes.STRING,
         allowNull: false
@@ -47,7 +54,8 @@ module.exports = (sequelize, DataTypes) => {
       hooks: true
     });
     User.belongsTo(models.Classroom, {
-      foreignKey: 'classroomId'
+      foreignKey: 'classroomId',
+      as: 'classroom'
     });
   };
   return User;

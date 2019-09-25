@@ -9,18 +9,22 @@ module.exports = {
       },
       name: {
         type: Sequelize.STRING,
-        unique: true
+        unique: true,
+        allowNull: false
       },
       email: {
         type: Sequelize.STRING,
-        unique: true
+        unique: true,
+        allowNull: false
       },
-       password: {
-        type: Sequelize.STRING
-      },
-      phoneNumber:{
+      password: {
         type: Sequelize.STRING,
-        unique: true
+        allowNull: false
+      },
+      phoneNumber: {
+        type: Sequelize.STRING,
+        unique: true,
+        allowNull: false
       },
       district: {
         type: Sequelize.STRING,
@@ -30,9 +34,18 @@ module.exports = {
         type: Sequelize.STRING,
         allowNull: false
       },
-     description:{
-       type: Sequelize.STRING(250),
-     },
+      sector: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      logo: {
+        type: Sequelize.STRING,
+        allowNull: true,
+        defaultValue: ''
+      },
+      description: {
+        type: Sequelize.STRING(250)
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE

@@ -9,6 +9,8 @@ module.exports = {
           country: 'Rwanda',
           district: 'Gasabo',
           phoneNumber: '07800000',
+          email: 'principal@school.org',
+          sector: 'Kimironko',
           createdAt: new Date(),
           updatedAt: new Date()
         }

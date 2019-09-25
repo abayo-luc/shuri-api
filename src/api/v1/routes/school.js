@@ -23,6 +23,7 @@ schoolRouters
   .put(
     '/schools/:id',
     authorize(superAdmin, accountantAdmin),
+    validateSchool,
     SchoolController.update
   )
   .post(

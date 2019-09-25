@@ -28,12 +28,12 @@ classroomRouters
     ClassroomController.delete
   )
   .post(
-    '/classrooms/:id/teacher/:teacherId',
+    '/classrooms/:id/teachers/:teacherId',
     authorize(schoolPrincipal),
     ClassroomController.addTeacher
   )
   .put(
-    `/classrooms/:id/teacher`,
+    `/classrooms/:id/teachers/remove`,
     authorize(schoolPrincipal),
     ClassroomController.removeTeacher
   );

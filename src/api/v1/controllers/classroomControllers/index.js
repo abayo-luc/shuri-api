@@ -1,8 +1,9 @@
 import db from '../../../../models';
 import { badRequest, notFound, okResponse } from '../../../../utils/response';
 import { TEACHER } from '../schoolUserControllers/types';
+import {paginate, textSearch} from '../../../../utils/queryHelpers'
 
-const { Classroom, School, User } = db;
+const { Classroom,  User } = db;
 
 export default class ClassroomController {
   static async create(req, res) {
@@ -19,21 +20,21 @@ export default class ClassroomController {
   static async findAll(req, res) {
     try {
       const { schoolId } = req.params;
-      const data = await School.findOne({
+      const {limit, page, search} = req.query
+      const {rows, count} = await Classroom.findAndCountAll({
         where: {
-          id: schoolId
+         schoolId,
+         ...textSearch(search, 'classroom').where
         },
+        ...paginate(page, limit),
         include: [
           {
-            model: Classroom,
-            as: 'classrooms'
+            model: User,
+            as: 'teacher'
           }
         ]
       });
-      if (!data) {
-        return notFound(res);
-      }
-      return okResponse(res, data);
+      return okResponse(res, {classrooms: rows, totalClassrooms: count});
     } catch (error) {
       return badRequest(res, error);
     }
@@ -52,8 +53,8 @@ export default class ClassroomController {
             }
           },
           {
-            model: School,
-            as: 'school'
+            model: User,
+            as: 'teacher'
           }
         ]
       });
@@ -131,34 +132,51 @@ export default class ClassroomController {
           schoolId,
           id: teacherId,
           type: TEACHER
-        }
+        },
+        include:[
+          {
+            model: Classroom,
+            as:'classroom'
+          }
+        ]
       });
       if (!teacher) {
         return notFound(res, 'Teacher not found');
+      } if(teacher.classroom){
+        throw Error(`${teacher.name || 'Teacher'} already assigned to ${teacher.classroom.name || 'classroom'}`)
       }
       const classroom = await Classroom.findOne({
         where: {
           id,
           schoolId
-        }
+        },
+        include:[
+          {
+            model: User,
+            as:'teacher'
+          }
+        ]
       });
+      if(!classroom){
+        return notFound(res, 'Classroom not found')
+      } if(classroom.teacher){
+        throw Error(`${classroom.name} already assigned to ${classroom.teacher.name || 'a teacher'}`)
+      }
 
       const alreadyExit = teacher.classroomId === id;
       if (alreadyExit) {
         throw new Error(
-          `${teacher.firstName ||
-            teacher.lastName ||
-            'Teacher'} already assigned to class ${classroom.name}`
+          `${teacher.name || 'Teacher'} already assigned to class ${
+            classroom.name
+          }`
         );
       }
-      await teacher.setClassroom(classroom, { returning: true });
+      await teacher.setClassroom(classroom);
       return okResponse(
         res,
         undefined,
         200,
-        `${teacher.firstName ||
-          teacher.lastName ||
-          'Teacher'} successfully added to ${classroom.name}`
+        `${teacher.name || 'Teacher'} successfully added to ${classroom.name}`
       );
     } catch (error) {
       return badRequest(res, error);

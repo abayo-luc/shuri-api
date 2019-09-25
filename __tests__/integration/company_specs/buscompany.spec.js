@@ -6,7 +6,8 @@ const company = {
   email: 'company_3@example.com',
   phoneNumber: '0789277275',
   country: 'Rwanda',
-  district: 'Gasabo'
+  district: 'Gasabo',
+  sector: 'Kimironko'
 };
 let adminToken;
 let companyToken;
@@ -140,6 +141,19 @@ describe('Bus Company Controller', () => {
           expect(message).toEqual(
             'You may not have the appropriate permissions to perform this action'
           );
+          done();
+        });
+    });
+
+    test('should not allow company to create another company', done => {
+      return request
+        .post('/api/v1/companies')
+        .send({ ...company, phoneNumber: '34567893456789' })
+        .set('Authorization', `Bearer ${adminToken}`)
+        .expect(400)
+        .then(res => {
+          const { error } = res.body;
+          expect(error).toEqual({ phoneNumber: 'Invalid phone number' });
           done();
         });
     });
